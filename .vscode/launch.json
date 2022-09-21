@@ -9,7 +9,15 @@
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/build.js"
+      "program": "${workspaceFolder}/build.js",
+    },
+    {
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "Npm Command",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "build"]
     }
   ]
 }

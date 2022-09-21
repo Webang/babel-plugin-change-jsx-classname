@@ -1,5 +1,4 @@
 const types = require("@babel/types");
-
 let config = {};
 
 module.exports = function (
@@ -22,21 +21,30 @@ function CallExpression(path) {
     const callFn = callee.object.name + "." + callee.property.name;
     if (callFn === "React.createElement") {
       path.skip();
-      path.get("arguments.1").traverse({
-        ObjectProperty,
-      });
-    }
-  }
-}
 
-function ObjectProperty(path) {
-  const key = path.node.key;
-  const val = path.node.value;
-  if (key.name === "className") {
-    path.node.value = types.binaryExpression(
-      "+",
-      types.StringLiteral(config.prefix),
-      val
-    );
+      const arg1 = path.get("arguments.1");
+
+      if (arg1.node.type === 'NullLiteral') {
+        // null
+        arg1.replaceWith(types.objectExpression([
+          types.objectProperty(types.identifier('className'), types.stringLiteral(config.prefix))
+        ]))
+      } else {
+        // {}
+        if ((arg1.node.type) === 'ObjectExpression') {
+          const index = arg1.node.properties.findIndex(it => {
+            return it.key.name === 'className'
+          });
+          if (index !== -1) {
+            const proPath = arg1.get(`properties.${index}`);
+            proPath.node.value = types.binaryExpression(
+              "+",
+              types.StringLiteral(config.prefix),
+              proPath.node.value
+            );
+          }
+        }
+      }
+    }
   }
 }
